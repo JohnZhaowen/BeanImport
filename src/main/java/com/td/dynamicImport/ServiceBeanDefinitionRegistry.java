@@ -42,12 +42,10 @@ public class ServiceBeanDefinitionRegistry implements BeanDefinitionRegistryPost
 
     private ApplicationContext applicationContext;
 
-
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
     }
-
 
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
@@ -60,15 +58,16 @@ public class ServiceBeanDefinitionRegistry implements BeanDefinitionRegistryPost
         this.applicationContext = applicationContext;
     }
 
-
-
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         //这里一般我们是通过反射获取需要代理的接口的clazz列表
         //比如判断包下面的类，或者通过某注解标注的类等等
         Set<Class<?>> beanClazzs = scannerPackages("com.td.dynamicImport");
         for (Class beanClazz : beanClazzs) {
-            BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(beanClazz);
+            //注意，这里的Class参数是生成Bean实例的工厂，不是Bean本身。
+            // FactoryBean是一种特殊的Bean，其返回的对象不是指定类的一个实例，
+            // 其返回的是该工厂Bean的getObject方法所返回的对象。
+            BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ServiceFactory.class);
             GenericBeanDefinition definition = (GenericBeanDefinition) builder.getRawBeanDefinition();
 
             //在这里，我们可以给该对象的属性注入对应的实例。
@@ -79,11 +78,6 @@ public class ServiceBeanDefinitionRegistry implements BeanDefinitionRegistryPost
             // 如果采用definition.getConstructorArgumentValues()，
             // 则FactoryBean中需要提供包含该属性的构造方法，否则会注入失败
             definition.getConstructorArgumentValues().addGenericArgumentValue(beanClazz);
-
-            //注意，这里的BeanClass是生成Bean实例的工厂，不是Bean本身。
-            // FactoryBean是一种特殊的Bean，其返回的对象不是指定类的一个实例，
-            // 其返回的是该工厂Bean的getObject方法所返回的对象。
-            definition.setBeanClass(ServiceFactory.class);
 
             //这里采用的是byType方式注入，类似的还有byName等
             definition.setAutowireMode(GenericBeanDefinition.AUTOWIRE_BY_TYPE);

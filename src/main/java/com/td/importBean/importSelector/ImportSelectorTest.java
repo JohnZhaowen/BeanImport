@@ -68,9 +68,7 @@ public class ImportSelectorTest implements ImportSelector, ResourceLoaderAware {
             e.printStackTrace();
         }
         String[] result = new String[set.size()];
-        for(int i= 0; i < set.size(); i++){
-            result[i] = set.get(i);
-        }
+        set.toArray(result);
 
         return result;
     }
