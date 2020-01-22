@@ -119,11 +119,7 @@ public class ServiceBeanDefinitionRegistry implements BeanDefinitionRegistryPost
 
 
     protected String resolveBasePackage(String basePackage) {
-        return ClassUtils.convertClassNameToResourcePath(this.getEnvironment().resolveRequiredPlaceholders(basePackage));
-    }
-
-    private Environment getEnvironment() {
-        return applicationContext.getEnvironment();
+        return ClassUtils.convertClassNameToResourcePath(applicationContext.getEnvironment().resolveRequiredPlaceholders(basePackage));
     }
 
 }
